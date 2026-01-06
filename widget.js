@@ -14,15 +14,40 @@ document.addEventListener("DOMContentLoaded", function () {
     box.style.display = box.style.display === "flex" ? "none" : "flex";
   });
 
+  // --- INTERNAL HELPER FUNCTIONS ---
+
+  function addMessage(text, className) {
+    const div = document.createElement("div");
+    // Ensure "message" class is always included for styling
+    div.className = "message " + className;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addLoadingMessage() {
+    const loadingId = "loading-" + Date.now();
+    const loadingDiv = document.createElement("div");
+    loadingDiv.id = loadingId;
+    // Uses bot styling + a special 'loading' class
+    loadingDiv.className = "message jumitech-bot loading"; 
+    loadingDiv.textContent = "Jumitech is thinking...";
+    
+    messages.appendChild(loadingDiv);
+    messages.scrollTop = messages.scrollHeight;
+    return loadingId; 
+  }
+
+  // --- MAIN CHAT LOGIC ---
+
   window.sendJumitechMessage = function () {
     const text = input.value.trim();
     if (!text) return;
 
-    // 1. Show the user's message immediately
     addMessage(text, "jumitech-user");
     input.value = "";
 
-    // 2. CREATE THE LOADING BUBBLE
+    // 1. Show Loading
     const loadingMessageId = addLoadingMessage();
 
     fetch("https://jumitech-assistant.antonymwenda913.workers.dev/", {
@@ -31,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
       body: JSON.stringify({ message: text })
     })
     .then(async res => {
-      // 3. REMOVE THE LOADING BUBBLE (The AI is starting to answer)
+      // 2. Remove Loading immediately when response starts
       const loader = document.getElementById(loadingMessageId);
       if (loader) loader.remove();
 
@@ -43,10 +68,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     })
     .then(data => {
-      // 4. Display the actual AI response
       addMessage(data.reply || "No response received.", "jumitech-bot");
 
-      // Handle links if they exist
       if (Array.isArray(data.links)) {
         data.links.forEach(link => {
           const a = document.createElement("a");
@@ -55,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
           a.target = "_blank";
           a.style.display = "block";
           a.style.margin = "6px 0";
+          a.style.color = "#007bff";
           messages.appendChild(a);
         });
       }
@@ -62,36 +86,22 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.follow_up) {
         addMessage(data.follow_up, "jumitech-bot");
       }
+      
+      messages.scrollTop = messages.scrollHeight;
     })
     .catch(err => {
-      // 5. Cleanup if there is a network error
       const loader = document.getElementById(loadingMessageId);
       if (loader) loader.remove();
       console.error(err);
       addMessage("Sorry, I encountered a connection error.", "jumitech-bot");
     });
-};
+  };
 
-  function addMessage(text, className) {
-    const div = document.createElement("div");
-    div.className = className;
-    div.textContent = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-  }
+  // Allow "Enter" key to send messages
+  input.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      window.sendJumitechMessage();
+    }
+  });
 
 });
-
-// Add this at the very bottom of your frontend.js file
-function addLoadingMessage() {
-    const loadingId = "loading-" + Date.now();
-    const loadingDiv = document.createElement("div");
-    loadingDiv.id = loadingId;
-    loadingDiv.className = "message jumitech-bot loading"; // 'loading' class can be styled in CSS
-    loadingDiv.textContent = "Jumitech is thinking...";
-    
-    // This adds the bubble to your chat window
-    messages.appendChild(loadingDiv);
-    messages.scrollTop = messages.scrollHeight;
-    return loadingId; // We return the ID so we can delete this specific bubble later
-}
