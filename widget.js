@@ -132,6 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (nudge.parentNode) nudge.remove();
         }, 15000);
     }
-}, 15000);
+}, 7000);
 
 });
