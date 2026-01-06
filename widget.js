@@ -109,5 +109,19 @@ document.addEventListener("DOMContentLoaded", function () {
       window.sendJumitechMessage();
     }
   });
+  
+  // Show a nudge bubble 3 seconds after page load
+setTimeout(() => {
+    if (box.style.display !== "flex") { // Only show if chat is closed
+        const nudge = document.createElement("div");
+        nudge.className = "jumitech-nudge";
+        nudge.innerHTML = "Hi! Need help finding the best TV prices? 🇰🇪";
+        nudge.onclick = () => btn.click(); // Open chat when clicked
+        document.body.appendChild(nudge);
+        
+        // Auto-hide nudge after 8 seconds
+        setTimeout(() => nudge.remove(), 8000);
+    }
+}, 3000);
 
 });
