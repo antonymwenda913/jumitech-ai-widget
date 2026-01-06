@@ -62,9 +62,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     })
     .catch(err => {
-      console.error(err);
-      addMessage("Sorry, something went wrong. Please try again.", "jumitech-bot");
-    });
+  console.error("Jumitech Error Details:", err); // Lets you see the real error in Console (F12)
+  addMessage("Sorry, something went wrong. Please try again.", "jumitech-bot");
+});
   };
 
   function addMessage(text, className) {
