@@ -26,7 +26,18 @@ document.addEventListener("DOMContentLoaded", function () {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text })
     })
-    .then(res => res.json())
+    .then(async res => {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.error("Non-JSON response:", text);
+    return {
+      reply: "I’m having trouble responding right now, but here are some helpful Jumitech pages.",
+      links: []
+    };
+  }
+})
     .then(data => {
 
       addMessage(data.reply || "No response received.", "jumitech-bot");
