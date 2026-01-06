@@ -110,17 +110,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   
-  // Show a nudge bubble 3 seconds after page load
-setTimeout(() => {
-    if (box.style.display !== "flex") { // Only show if chat is closed
+  setTimeout(() => {
+    // We check if the box is NOT visible
+    const isHidden = !box.style.display || box.style.display === "none";
+    
+    if (isHidden) {
+        console.log("Jumitech: Triggering nudge..."); // Check your browser console (F12) for this message
         const nudge = document.createElement("div");
         nudge.className = "jumitech-nudge";
         nudge.innerHTML = "Hi! Need help finding the best TV prices? 🇰🇪";
-        nudge.onclick = () => btn.click(); // Open chat when clicked
+        
+        nudge.onclick = () => {
+            box.style.display = "flex";
+            nudge.remove();
+        };
+
         document.body.appendChild(nudge);
         
-        // Auto-hide nudge after 8 seconds
-        setTimeout(() => nudge.remove(), 8000);
+        // Let's keep it visible for 15 seconds instead of 8 so you have time to see it
+        setTimeout(() => {
+            if (nudge.parentNode) nudge.remove();
+        }, 15000);
     }
 }, 3000);
 
