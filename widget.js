@@ -18,12 +18,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function addMessage(text, className) {
     const div = document.createElement("div");
-    // Ensure "message" class is always included for styling
-    div.className = "message " + className;
-    div.textContent = text;
+    div.className = className;
+    
+    // This part converts the AI's Markdown (* or #) into real HTML lists
+    if (typeof marked !== 'undefined') {
+        div.innerHTML = marked.parse(text);
+    } else {
+        div.textContent = text; // Fallback if library fails to load
+    }
+    
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
-  }
+}
 
   function addLoadingMessage() {
     const loadingId = "loading-" + Date.now();
