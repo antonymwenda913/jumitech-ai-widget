@@ -123,10 +123,38 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Show Loading
     const loadingMessageId = addLoadingMessage();
 
+    // ✅ PREPARE HISTORY PAYLOAD
+    // We retrieve the history from LocalStorage, filter only the text messages,
+    // and format them for the AI.
+    let historyPayload = [];
+    const rawHistory = localStorage.getItem(STORAGE_KEY);
+    if (rawHistory) {
+        try {
+            const parsed = JSON.parse(rawHistory);
+            // Filter for text only
+            const textItems = parsed.items.filter(i => i.type === "text");
+            
+            // IMPORTANT: The message we just added (line 120) is already in LS.
+            // We slice it off so we don't send the current message twice (once in 'message', once in 'history').
+            const previousItems = textItems.slice(0, -1);
+
+            historyPayload = previousItems.map(item => ({
+                role: item.className === "jumitech-user" ? "user" : "assistant",
+                content: item.text
+            }));
+        } catch (e) {
+            console.warn("Failed to parse history for payload", e);
+        }
+    }
+
     fetch("https://jumitech-assistant.antonymwenda913.workers.dev/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      // ✅ SEND HISTORY ALONG WITH MESSAGE
+      body: JSON.stringify({ 
+          message: text,
+          history: historyPayload 
+      })
     })
     .then(async res => {
       // 2. Remove Loading immediately when response starts
@@ -182,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Jumitech: Triggering nudge..."); 
         const nudge = document.createElement("div");
         nudge.className = "jumitech-nudge";
-        nudge.innerHTML = "Hi! Ask Jumitech AI";
+        nudge.innerHTML = "Ask Jumitech AI";
         
         nudge.onclick = () => {
             box.style.display = "flex";
