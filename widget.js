@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Jumitech: Triggering nudge..."); 
         const nudge = document.createElement("div");
         nudge.className = "jumitech-nudge";
-        nudge.innerHTML = "Hi! Need help ?";
+        nudge.innerHTML = "Hi! Ask Jumitech AI";
         
         nudge.onclick = () => {
             box.style.display = "flex";
